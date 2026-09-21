@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#07070a">
+<title>废物是怎样练成的</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{
+    width:100%;height:100%;overflow:hidden;background:#07070a;
+    -webkit-text-size-adjust:100%;text-size-adjust:100%;
+    -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;
+  }
+
+  body{
+    width:100%;height:100%;overflow:hidden;overscroll-behavior:none;
+    background:#07070a;color:#b9b9c0;
+    font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC","Noto Serif SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;
+  }
+
+  button{
+    font-family:inherit;-webkit-tap-highlight-color:transparent;
+    -webkit-appearance:none;appearance:none;outline:none;
+    border-radius:0;cursor:pointer;
+  }
+
+  .music-toggle{
+    position:fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    right: calc(env(safe-area-inset-right, 0px) + 14px);
+    z-index:40;width:42px;height:42px;border-radius:50%;
+    background:rgba(12,12,18,.75);border:1px solid #2a2a32;color:#8e8e98;
+    display:flex;align-items:center;justify-content:center;padding:0;
+    opacity:0;pointer-events:none;transform:scale(.8);
+    transition: opacity .3s ease, transform .3s ease,
+                background .25s ease, border-color .25s ease, color .25s ease;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  }
+  .music-toggle.visible{opacity:1;pointer-events:auto;transform:scale(1);}
+  .music-toggle:active{background:rgba(142,64,64,.22);border-color:#8e4040;color:#e2e2e8;}
+  @media (hover: hover) and (pointer: fine){
+    .music-toggle:hover{border-color:#4a4a58;color:#c9c9d0;}
+  }
+  .music-toggle svg{display:block;width:18px;height:18px;pointer-events:none;}
+  .music-toggle .icon-on{display:block;}
+  .music-toggle .icon-off{display:none;}
+  .music-toggle.muted .icon-on{display:none;}
+  .music-toggle.muted .icon-off{display:block;}
+  .music-toggle.muted{color:#5a4040;border-color:#3a2222;}
+
+  #cover{
+    position:fixed;top:0;left:0;width:100%;
+    height:100vh;height:var(--app-h, 100vh);
+    z-index:30;display:flex;align-items:center;justify-content:center;
+    background:#07070a;transition:opacity 1.4s ease;
+    padding: calc(env(safe-area-inset-top, 0px) + 24px)
+             calc(env(safe-area-inset-right, 0px) + 24px)
+             calc(env(safe-area-inset-bottom, 0px) + 24px)
+             calc(env(safe-area-inset-left, 0px) + 24px);
+  }
+  #cover.hide{opacity:0;pointer-events:none;}
+  .cover-inner{text-align:center;padding:0 16px;max-width:520px;}
+  .cover-inner h1{
+    font-size:26px;font-weight:400;letter-spacing:10px;
+    color:#d6d6dc;margin-bottom:22px;
+    animation:fade 2s ease forwards;opacity:0;word-break:break-all;
+  }
+  .cover-inner .sub{
+    font-size:12px;letter-spacing:6px;color:#8a8a96;margin-bottom:52px;
+    animation:fade 2s .4s ease forwards;opacity:0;
+  }
+  #startBtn{
+    background:transparent;border:1px solid #2c2c34;color:#8e8e98;
+    font-size:14px;letter-spacing:6px;padding:16px 48px;border-radius:2px;
+    transition:all .4s ease;
+    animation:fade 2s .9s ease forwards;opacity:0;
+    min-height:50px;position:relative;z-index:1;touch-action:manipulation;
+  }
+  #startBtn:active{background:rgba(142,64,64,.12);border-color:#8e4040;color:#e2e2e8;}
+  @media (hover: hover) and (pointer: fine){
+    #startBtn:hover{border-color:#8e4040;color:#e2e2e8;background:rgba(142,64,64,.08);}
+  }
+
+  #app{
+    position:fixed;top:0;left:0;width:100%;
+    height:100vh;height:var(--app-h, 100vh);
+    max-width:620px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;
+    padding-left: calc(env(safe-area-inset-left, 0px) + 22px);
+    padding-right: calc(env(safe-area-inset-right, 0px) + 22px);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    overflow:hidden;
+  }
+
+  #log{
+    flex: 1 1 0;min-height: 0;width:100%;
+    overflow-y: auto;overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;touch-action: pan-y;
+    scrollbar-width: none;-ms-overflow-style: none;
+    padding: 20px 0 8px;
+  }
+  #log::-webkit-scrollbar{display:none;width:0;height:0;}
+  #log p{
+    font-size:16px;line-height:1.9;margin-bottom:11px;letter-spacing:.5px;
+    opacity:0;animation:fade .9s ease forwards;
+    word-wrap:break-word;word-break:break-word;overflow-wrap:break-word;
+  }
+  @keyframes fade{to{opacity:1;}}
+
+  .nar{color:#94949d;}
+  .said{color:#dcdce2;}
+  .prompt{color:#8a8a96;font-size:14px;margin-top:18px;}
+  .echo{color:#8e4040;font-size:15px;letter-spacing:.8px;margin-bottom:10px;}
+  .echo-tag{
+    display:inline-block;font-size:10px;color:#9a9aa6;
+    letter-spacing:2px;margin-right:9px;vertical-align:1px;
+  }
+  .final{
+    color:#c9c9d0;font-size:19px;letter-spacing:3px;
+    text-align:center;margin-top:30px;margin-bottom:24px;
+  }
+
+  .chapter{text-align:center;padding:20px 0 26px;opacity:0;animation:fade 1.4s ease forwards;}
+  .ch-title{font-size:19px;letter-spacing:7px;color:#d0d0d6;margin-bottom:12px;}
+  .ch-sub{font-size:12px;letter-spacing:3px;color:#a8a8b4;line-height:1.6;}
+
+  #choices{
+    flex: 0 0 auto;width:100%;padding: 8px 0 12px;
+    position:relative;z-index:5;
+  }
+  .choice{
+    display:block;width:100%;text-align:left;
+    background:transparent;
+    border:1px solid #23232b;border-left:2px solid #3a3a44;
+    color:#a6a6b0;font-size:15px;line-height:1.7;
+    padding:15px 16px;margin-bottom:9px;border-radius:2px;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+    opacity:0;animation:fade .6s ease forwards;
+    min-height:50px;touch-action:manipulation;
+  }
+  .choice:last-child{margin-bottom:0;}
+  .choice:active{
+    border-color:#4a4a58;border-left-color:#8e4040;
+    color:#ececf2;background:rgba(142,64,64,.1);
+  }
+  @media (hover: hover) and (pointer: fine){
+    .choice:hover{
+      border-color:#4a4a58;border-left-color:#8e4040;
+      color:#ececf2;background:rgba(142,64,64,.07);padding-left:22px;
+    }
+  }
+
+  .restart-btn{
+    text-align:center;color:#c9a0a0;
+    border:1px solid #5a3030;border-left:2px solid #8e4040;
+    letter-spacing:8px;padding:20px 16px;font-size:16px;
+    background:rgba(142,64,64,.08);margin-bottom:0;
+  }
+  .restart-btn:active{color:#fff;background:rgba(190,86,86,.28);border-color:#c25a5a;}
+
+  #breath{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:12;
+    background:radial-gradient(ellipse at center,transparent 0%,transparent 42%,rgba(0,0,0,.55) 100%);
+    opacity:0;transition:opacity 1.2s ease;
+  }
+  #breath.on{opacity:1;animation:breathe 1.15s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:.45;}50%{opacity:.92;}}
+
+  #vignette{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:14;
+    box-shadow: inset 0 0 0 0 transparent;
+    transition: box-shadow .7s ease;
+  }
+
+  .trail-dot{
+    position:fixed;width:22px;height:22px;
+    margin-left:-11px;margin-top:-11px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 40%,rgba(0,0,0,0) 72%);
+    pointer-events:none;z-index:14;opacity:.42;transition:opacity 1.3s ease;
+  }
+
+  #choices.stage{
+    position:fixed;top:0;left:0;width:100%;
+    height:100vh;height:var(--app-h, 100vh);
+    z-index:15;padding:0;margin:0;
+    background:transparent;pointer-events:none;overflow:hidden;
+  }
+  #choices.stage .choice{
+    position:absolute;display:block;width:auto;margin:0;
+    border-radius:2px;opacity:1;animation:none;
+    pointer-events:auto;min-height:0;touch-action:manipulation;
+  }
+  #choices.stage .center-back{
+    left:50%;top:50%;transform:translate(-50%,-50%);
+    text-align:center;color:#a6a6b0;
+    border:1px solid #23232b;border-left:2px solid #3a3a44;
+    z-index:3;min-height:48px;
+    transition: all .5s cubic-bezier(.4,0,.2,1),
+                color .3s ease,border-color .3s ease,background .3s ease;
+  }
+  #choices.stage .center-back:active{
+    border-color:#4a4a58;border-left-color:#8e4040;color:#ececf2;background:rgba(142,64,64,.1);
+  }
+  #choices.stage .center-back[disabled]{pointer-events:none;opacity:.4;}
+
+  #choices.stage .spawn-forward{
+    pointer-events:none;min-width:96px;height:36px;padding:0;text-align:center;
+    font-size:12px;line-height:34px;letter-spacing:2px;color:transparent;
+    border:1px solid #3a2222;border-left:1px solid #5a3030;
+    background:rgba(142,64,64,.05);
+    animation:spawnIn .55s ease;
+    transition: color .8s ease, background .8s ease;
+  }
+  #choices.stage .spawn-forward.shown{color:#9a5a5a;background:rgba(142,64,64,.1);}
+  @keyframes spawnIn{from{opacity:0;transform:scale(.82);}to{opacity:1;transform:scale(1);}}
+
+  #choices.final-stage{
+    position:fixed;top:0;left:0;width:100%;
+    height:100vh;
+    height:var(--app-h, 100vh);
+    min-height:100vh;
+    min-height:var(--app-h, 100vh);
+    z-index:25;
+    padding: calc(env(safe-area-inset-top, 0px) + 24px)
+             calc(env(safe-area-inset-right, 0px) + 24px)
+             calc(env(safe-area-inset-bottom, 0px) + 24px)
+             calc(env(safe-area-inset-left, 0px) + 24px);
+    margin:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(5,5,8,.97);
+    pointer-events:auto;
+    opacity:1;
+    visibility:visible;
+  }
+  #choices.final-stage .final-forward{
+    position:static;
+    display:block;width:auto;
+    min-width:min(78vw,440px);
+    margin:0;
+    padding:42px 40px;text-align:center;
+    font-size:26px;letter-spacing:12px;text-indent:12px;
+    color:#f0cccc;background:rgba(142,64,64,.16);
+    border:2px solid #8e4040;
+    border-radius:2px;
+    box-shadow:0 0 50px rgba(142,64,64,.3), inset 0 0 40px rgba(142,64,64,.18);
+    animation:pulseBig 2.4s ease-in-out infinite;
+    min-height:110px;
+    touch-action:manipulation;
+    opacity:1;
+    visibility:visible;
+  }
+  #choices.final-stage .final-forward:active{
+    color:#fff;background:rgba(190,86,86,.4);border-color:#c25a5a;
+  }
+  @keyframes pulseBig{
+    0%,100%{box-shadow:0 0 40px rgba(142,64,64,.22), inset 0 0 34px rgba(142,64,64,.14);}
+    50%{box-shadow:0 0 80px rgba(190,80,80,.48), inset 0 0 54px rgba(180,80,80,.3);}
+  }
+
+  #flash{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:#fff;opacity:0;z-index:26;pointer-events:none;
+  }
+
+  #fade{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:#000;opacity:0;
+    pointer-events:none;transition:opacity 1.5s ease;z-index:20;
+  }
+  #fade.on{opacity:1;pointer-events:all;}
+
+  @media (max-width: 380px){
+    #app{
+      padding-left: calc(env(safe-area-inset-left, 0px) + 16px);
+      padding-right: calc(env(safe-area-inset-right, 0px) + 16px);
+      padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+    }
+    #log p{font-size:15px;line-height:1.8;}
+    .ch-title{font-size:17px;letter-spacing:6px;}
+    .ch-sub{font-size:11px;letter-spacing:2px;}
+    .chapter{padding:16px 0 22px;}
+    .choice{font-size:14.5px;padding:14px 14px;min-height:48px;}
+    .cover-inner h1{font-size:22px;letter-spacing:8px;}
+    #choices.final-stage .final-forward{
+      font-size:22px;letter-spacing:10px;text-indent:10px;
+      padding:36px 30px;min-width:80vw;min-height:90px;
+    }
+    .music-toggle{width:40px;height:40px;}
+    .music-toggle svg{width:16px;height:16px;}
+    .restart-btn{font-size:15px;letter-spacing:6px;padding:18px 14px;}
+  }
+
+  @media (orientation: landscape) and (max-height: 500px){
+    #log{padding:10px 0 4px;}
+    #log p{font-size:14px;line-height:1.7;margin-bottom:7px;}
+    .chapter{padding:8px 0 12px;}
+    .ch-title{font-size:15px;letter-spacing:5px;}
+    .ch-sub{font-size:10px;}
+    #choices{padding:4px 0 8px;}
+    .choice{font-size:13.5px;padding:10px 14px;margin-bottom:6px;min-height:42px;}
+    .cover-inner h1{font-size:20px;margin-bottom:16px;}
+    .cover-inner .sub{margin-bottom:26px;}
+    #choices.final-stage .final-forward{padding:26px 30px;min-height:80px;font-size:22px;}
+  }
+
+  @media (hover: none){
+    .choice:hover{padding-left:16px;}
+    #choices.stage .center-back:hover{
+      color:#a6a6b0;background:transparent;
+      border-color:#23232b;border-left-color:#3a3a44;
+    }
+    #choices.final-stage .final-forward:hover{
+      color:#f0cccc;background:rgba(142,64,64,.16);border-color:#8e4040;
+    }
+    .restart-btn:hover{
+      color:#c9a0a0;background:rgba(142,64,64,.08);border-color:#5a3030;
+    }
+    #startBtn:hover{background:transparent;border-color:#2c2c34;color:#8e8e98;}
+    .music-toggle:hover{border-color:#2a2a32;color:#8e8e98;}
+  }
+</style>
+</head>
+<body>
+
+<button id="musicToggle" class="music-toggle" type="button" aria-label="音乐开关">
+  <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l11-2v13"/>
+    <circle cx="6" cy="18" r="3"/>
+    <circle cx="17" cy="16" r="3"/>
+  </svg>
+  <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l11-2v13"/>
+    <circle cx="6" cy="18" r="3"/>
+    <circle cx="17" cy="16" r="3"/>
+    <line x1="3" y1="3" x2="21" y2="21"/>
+  </svg>
+</button>
+
+<div id="cover">
+  <div class="cover-inner">
+    <h1>废物是怎样练成的</h1>
+    <div class="sub">文字互动 · 六幕</div>
+    <button id="startBtn" type="button">开 始</button>
+  </div>
+</div>
+
+<div id="app">
+  <div id="log"></div>
+  <div id="choices"></div>
+</div>
+
+<div id="breath"></div>
+<div id="vignette"></div>
+<div id="flash"></div>
+<div id="fade"></div>
+
+<audio id="bgm" src="https://cf937.github.io/music/《他们说》.mp3.mp3" loop preload="auto" playsinline webkit-playsinline></audio>
+
+<script>
+(function(){
+  "use strict";
+
+  var acts = [
+  /* 第一幕 */
+  {
+    role: '母亲',
+    blocks: [
+      { type:'title', text:'第一幕', sub:'家里的废物 · 你现在是母亲' },
+      { type:'nar', lines:[
+        '晚饭桌。',
+        '陈默把最后一口米饭塞进嘴里。',
+        '你放下筷子，声音像一把钝刀。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '张姐的儿子又考了年级前十，保送清华基本定了。你呢？',
+        '隔壁张姐的儿子保送清华了，你什么时候能给我长一次脸？'
+      ]},
+      { type:'nar', lines:[
+        '陈默盯着碗底的米粒。',
+        '“二百七十三。”他说。',
+        '全校一共三百二十人。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '二百七十三！我怎么就生了你这么个不争气的东西？',
+        '三百二十个人里你考二百七十三，你是去学校睡觉的吗？'
+      ]},
+      { type:'nar', lines:[
+        '陈默起身收拾碗筷。',
+        '手背不小心碰到你的茶杯。',
+        '茶水溅在桌布上，留下褐色的污渍。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '连个碗都拿不好！滚去学习！',
+        '这点事都做不好，你还能干什么？'
+      ]},
+      { type:'nar', lines:[
+        '陈默默默走向自己不到六平米的房间。',
+        '书桌上堆满了辅导资料。',
+        '最上面那本《高考必刷题》的扉页上，你用红笔写着：',
+        '“考不上985，就别叫我妈！”'
+      ]}
+    ]
+  },
+
+  /* 第二幕 */
+  {
+    role: '王老师',
+    blocks: [
+      { type:'title', text:'第二幕', sub:'学校里的废物 · 你现在是班主任王老师' },
+      { type:'nar', lines:[
+        '讲台上。',
+        '你把数学试卷往桌上一拍。',
+        '鲜红的“58”刺得人眼睛疼。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '陈默！站起来！看看你考的这个分数！',
+        '五十八分。陈默，你是来上学的还是来混日子的？'
+      ]},
+      { type:'nar', lines:[
+        '陈默浑身一抖，慢慢从座位上站起来。',
+        '教室里爆发出一阵哄笑。',
+        '后排的刘强吹了个口哨。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '烂泥扶不上墙！',
+        '就你这样的，以后能干什么？扫大街都没人要！'
+      ]},
+      { type:'nar', lines:[
+        '你把试卷揉成一团，扔在他脸上。',
+        '纸团砸中他的鼻梁，落在地上。',
+        '陈默攥紧了拳头，指甲深深掐进掌心。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '站着听课！',
+        '全班都看看，这就是不努力的下场。'
+      ]},
+      { type:'nar', lines:[
+        '下课铃响，你抱着教案走出教室。',
+        '陈默还站在原地。',
+        '他昨晚熬到两点，做了整整两套题。',
+        '这件事，你永远不会知道。'
+      ]}
+    ]
+  },
+
+  /* 第三幕 */
+  {
+    role: '父亲',
+    blocks: [
+      { type:'title', text:'第三幕', sub:'社会里的废物 · 你现在是父亲' },
+      { type:'nar', lines:[
+        '晚餐桌。',
+        '你连看都没看儿子一眼。',
+        '筷子敲在碗沿上，发出清脆的响声。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '废物。',
+        '我怎么就养了你这么个东西。'
+      ]},
+      { type:'nar', lines:[
+        '高考前三个月。',
+        '陈默的模拟考试成绩单摊在桌上。',
+        '数字红得刺眼。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '考不上985，你就别回家了。',
+        '你要是考个垃圾学校，我的脸往哪搁？'
+      ]},
+      { type:'nar', lines:[
+        '高考结束。',
+        '陈默站在你面前，说“不太好”。',
+        '你把他的试卷撕成两半。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '废物就是废物。',
+        '早知道这样，不如生下来就掐死你。'
+      ]},
+      { type:'nar', lines:[
+        '碎片像雪花一样落在地上。',
+        '陈默蹲下去，一片一片捡起来。',
+        '然后他笑了。'
+      ]}
+    ]
+  },
+
+  /* 第四幕 */
+  {
+    role: '刘强',
+    blocks: [
+      { type:'title', text:'第四幕', sub:'人生里的废物 · 你现在是刘强' },
+      { type:'nar', lines:[
+        '课间。',
+        '你把一摞作业本拍在陈默桌上。',
+        '本子散开，压住了他正在写的字。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '废物，帮我们写作业呗。',
+        '闲着也是闲着，帮哥几个把作业写了。'
+      ]},
+      { type:'nar', lines:[
+        '陈默抬起头。',
+        '“我自己作业还没写完……”'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '哟，学会顶嘴了？信不信我告诉王老师你考试作弊？',
+        '你还敢说话？信不信我让你明天来不了学校？'
+      ]},
+      { type:'nar', lines:[
+        '高考录取结果出来那天。',
+        '你考上了本省的一本。',
+        '你在高中群里艾特了陈默。',
+        '他考上了一所普通的二本。'
+      ]},
+      { type:'ask', prompt:'你要说什么？', choices:[
+        '@陈默 废物考哪了？这种学校毕业了能干啥？',
+        '@陈默 哟，废物也有学上啊？'
+      ]},
+      { type:'nar', lines:[
+        '群里其他人跟着起哄。',
+        '陈默关掉群聊。',
+        '他点开和朋友的私聊窗口，打了一行字：',
+        '“你说，如果我消失了，会有人发现吗？”',
+        '十分钟后，对方回了一句：',
+        '“别矫情了，忙着呢。”'
+      ]}
+    ]
+  },
+
+  /* 第五幕 */
+  {
+    role: '陈默',
+    blocks: [
+      { type:'title', text:'第五幕', sub:'废物 · 你现在是陈默', musicTrigger:true },
+      { type:'nar', lines:[
+        '你叫陈默。',
+        '你十七岁。',
+        '你站在十三层楼的天台上。',
+        '夕阳把天空染成橙红色，远处的楼房像剪影一样美丽。',
+        '风很轻。'
+      ]},
+      { type:'nar', lines:[
+        '你闭上眼睛。',
+        '那些声音又来了。',
+        '它们从来没有离开过。'
+      ]},
+      { type:'backStep' }
+    ]
+  },
+
+  /* 第六幕 */
+  {
+    role: '旁观者',
+    blocks: [
+      { type:'title', text:'第六幕', sub:'我不是废物 · 你现在是旁观者' },
+      { type:'nar', lines:[
+        '你认识陈默。',
+        '你和他同班三年。',
+        '你坐在他斜后方两排。',
+        '你见过他很多次。',
+        '但你从来没有和他说过话。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他凌晨一点的台灯。',
+        '你见过他早上六点就在教室。',
+        '你见过他把错题抄了整整三本。',
+        '你见过他一个人对着墙背单词。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他举手，老师假装没看见。',
+        '你见过他问问题，老师说“这么简单都不会”。',
+        '你见过他被刘强推倒，自己爬起来。',
+        '你见过他什么都没说。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他拿着五十八分的卷子，',
+        '在厕所隔间里站了很久。',
+        '你见过他出来时，眼睛是红的，',
+        '但脸上没有表情。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他那天晚上，',
+        '把卷子上的错题又做了一遍。',
+        '你见过他偷偷在网上搜：',
+        '“怎样变聪明”。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他把“我不是废物”，',
+        '写在草稿纸的角落。',
+        '写了很多次。',
+        '多到那张纸都皱了。'
+      ]},
+      { type:'nar', lines:[
+        '你见过他一次次站起来。',
+        '你见过他一次次被按下去。',
+        '你见过他最后一次站起来，',
+        '是在天台上。'
+      ]},
+      { type:'ask', prompt:'你能看见天台上的他。', choices:[
+        '冲上去',
+        '喊他的名字'
+      ]},
+      { type:'nar', lines:[
+        '但你的身体动不了。',
+        '你张了张嘴，什么声音都发不出来。',
+        '你只是站在那里，',
+        '看着他消失在天的边缘。'
+      ]},
+      { type:'nar', lines:[
+        '你什么都没做。',
+        '你只是看着。',
+        '因为你以为，',
+        '他下次还会站起来的。'
+      ]},
+      { type:'nar', lines:[
+        '你想过他可能不会。',
+        '但你没敢想下去。',
+        '现在，一切结束了。',
+        '你站在这里，看着他最后写下的那行字。'
+      ]},
+      { type:'nar', lines:[
+        '“我不是废物。”',
+        '他没有在喊。',
+        '他只是在告诉自己。',
+        '可惜，没有人听。'
+      ]},
+      { type:'nar', lines:[
+        '你站在那里很久。',
+        '久到天边的橙红色变成了深紫色。',
+        '久到风也停了。',
+        '你终于明白了一件事。'
+      ]},
+      { type:'nar', lines:[
+        '陈默不是废物。',
+        '他从来都不是。',
+        '是一次又一次的否定，',
+        '把他推到了那个称呼上。'
+      ]},
+      { type:'nar', lines:[
+        '而你，和所有人一样，',
+        '选择了沉默。'
+      ]},
+      { type:'restart' }
+    ]
+  }
+  ];
+
+  var logEl, choicesEl, fadeEl, flashEl, vignetteEl, breathEl,
+      bgmEl, musicToggle, startBtn, coverEl;
+
+  var state = {
+    ai:0, bi:0,
+    echoes:[], echoIdx:0,
+    pushCount:0,
+    trailEnabled:false,
+    lastTrailTime:0,
+    musicOn:true,
+    musicStarted:false,
+    bound:false,
+    ending:false
+  };
+
+  var isTouchDevice = false;
+
+  function safeMatchMedia(q){
+    try {
+      if (typeof window.matchMedia === 'function'){
+        return window.matchMedia(q).matches;
+      }
+    } catch(e){}
+    return false;
+  }
+
+  function syncAppHeight(){
+    var h = 0;
+    if (window.visualViewport && window.visualViewport.height){
+      h = window.visualViewport.height;
+    } else if (window.innerHeight){
+      h = window.innerHeight;
+    } else if (document.documentElement && document.documentElement.clientHeight){
+      h = document.documentElement.clientHeight;
+    }
+    if (h && h > 0){
+      try {
+        document.documentElement.style.setProperty('--app-h', h + 'px');
+      } catch(e){}
+    }
+  }
+
+  function scrollBottom(){
+    if (!logEl) return;
+    var run = function(){
+      try { logEl.scrollTop = logEl.scrollHeight; } catch(e){}
+    };
+    requestAnimationFrame(run);
+    setTimeout(run, 60);
+    setTimeout(run, 180);
+    setTimeout(run, 360);
+  }
+
+  function addP(text, cls){
+    if (!logEl) return null;
+    var p = document.createElement('p');
+    if (cls) p.className = cls;
+    p.textContent = text;
+    logEl.appendChild(p);
+    return p;
+  }
+
+  function addEcho(role, line){
+    if (!logEl) return null;
+    var p = document.createElement('p');
+    p.className = 'echo';
+    var s = document.createElement('span');
+    s.className = 'echo-tag';
+    s.textContent = role;
+    p.appendChild(s);
+    p.appendChild(document.createTextNode('“' + line + '”'));
+    logEl.appendChild(p);
+    return p;
+  }
+
+  function showTitle(text, sub){
+    if (!logEl) return;
+    var d = document.createElement('div');
+    d.className = 'chapter';
+    d.innerHTML = '<div class="ch-title">' + text + '</div>' +
+                  '<div class="ch-sub">' + sub + '</div>';
+    logEl.appendChild(d);
+    scrollBottom();
+  }
+
+  function showLines(lines, cb){
+    var i = 0;
+    function tick(){
+      if (i >= lines.length){
+        if (cb) setTimeout(cb, 400);
+        return;
+      }
+      addP(lines[i], 'nar');
+      scrollBottom();
+      i++;
+      setTimeout(tick, 700);
+    }
+    tick();
+  }
+
+  function showChoices(b, role){
+    addP(b.prompt || '你要说什么？', 'prompt');
+    scrollBottom();
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+    b.choices.forEach(function(c, idx){
+      var btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.type = 'button';
+      btn.textContent = c;
+      btn.style.animationDelay = (idx * 0.12) + 's';
+      btn.addEventListener('click', function(){
+        if (choicesEl) choicesEl.innerHTML = '';
+        state.echoes.push({ role: role, line: c });
+        addP('“' + c + '”', 'said');
+        scrollBottom();
+        setTimeout(nextBlock, 900);
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function actTransition(cb){
+    if (!fadeEl){
+      if (cb) cb();
+      return;
+    }
+    fadeEl.style.transition = 'opacity 1.5s ease';
+    fadeEl.classList.add('on');
+
+    setTimeout(function(){
+      if (logEl) logEl.innerHTML = '';
+      if (choicesEl){
+        choicesEl.className = '';
+        choicesEl.innerHTML = '';
+      }
+      if (logEl) logEl.scrollTop = 0;
+
+      setTimeout(function(){
+        fadeEl.classList.remove('on');
+        setTimeout(cb, 260);
+      }, 240);
+    }, 1620);
+  }
+
+  function nextBlock(){
+    if (state.ai >= acts.length) return;
+
+    var act = acts[state.ai];
+    if (!act || !act.blocks){ return; }
+
+    if (state.bi >= act.blocks.length){
+      state.ai++;
+      state.bi = 0;
+      if (state.ai < acts.length){
+        actTransition(nextBlock);
+      }
+      return;
+    }
+
+    var b = act.blocks[state.bi];
+    state.bi++;
+
+    switch (b.type){
+      case 'title':
+        showTitle(b.text, b.sub);
+        if (b.musicTrigger && !state.musicStarted){
+          state.musicStarted = true;
+          setTimeout(function(){
+            startBGM();
+            if (musicToggle){
+              musicToggle.classList.add('visible');
+              musicToggle.classList.remove('muted');
+            }
+            state.musicOn = true;
+          }, 700);
+        }
+        setTimeout(nextBlock, 2000);
+        break;
+      case 'nar':
+        showLines(b.lines, nextBlock);
+        break;
+      case 'ask':
+        showChoices(b, act.role);
+        break;
+      case 'backStep':
+        renderBackButton();
+        break;
+      case 'restart':
+        showRestartButton();
+        break;
+    }
+  }
+
+  function renderBackButton(){
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+
+    var btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.type = 'button';
+    btn.textContent = '后退一步';
+    btn.style.animationDelay = '0s';
+    btn.addEventListener('click', onBackClick);
+    choicesEl.appendChild(btn);
+    scrollBottom();
+  }
+
+  function onBackClick(){
+    if (!choicesEl) return;
+    choicesEl.innerHTML = '';
+
+    addP('你试着往后挪了半步。', 'nar');
+    scrollBottom();
+
+    setTimeout(function(){
+      addP('身后没有路。', 'nar');
+      scrollBottom();
+
+      setTimeout(function(){
+        if (state.echoIdx < state.echoes.length){
+          var e = state.echoes[state.echoIdx];
+          addEcho(e.role, e.line);
+          state.echoIdx++;
+          scrollBottom();
+
+          setTimeout(function(){
+            if (state.echoIdx < state.echoes.length){
+              renderBackButton();
+            } else {
+              afterAllEchoes();
+            }
+          }, 1150);
+        } else {
+          afterAllEchoes();
+        }
+      }, 950);
+    }, 950);
+  }
+
+  function afterAllEchoes(){
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+
+    addP('你睁开眼。', 'nar');
+    scrollBottom();
+
+    setTimeout(function(){
+      addP('手机在口袋里震动。', 'nar');
+      scrollBottom();
+
+      setTimeout(function(){
+        addP('“死哪去了？回来吃饭！”', 'said');
+        scrollBottom();
+
+        setTimeout(function(){
+          startPushLoop();
+        }, 1400);
+      }, 1000);
+    }, 1000);
+  }
+
+  function onMouseMove(e){
+    if (isTouchDevice) return;
+    if (!state.trailEnabled) return;
+    var now = Date.now();
+    if (now - state.lastTrailTime < 55) return;
+    state.lastTrailTime = now;
+
+    var dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    dot.style.left = e.clientX + 'px';
+    dot.style.top  = e.clientY + 'px';
+    document.body.appendChild(dot);
+
+    requestAnimationFrame(function(){ dot.style.opacity = '0'; });
+    setTimeout(function(){
+      if (dot.parentNode) dot.parentNode.removeChild(dot);
+    }, 1400);
+  }
+
+  function updateVignette(){
+    if (!vignetteEl) return;
+    var t = state.pushCount / 10;
+    var blur   = 70  + t * 400;
+    var spread = 0   + t * 110;
+    var alpha  = 0.42 + t * 0.52;
+    vignetteEl.style.boxShadow =
+      'inset 0 0 ' + blur + 'px ' + spread + 'px rgba(0,0,0,' + alpha + ')';
+  }
+
+  function shrinkBackButton(btn){
+    if (!btn) return;
+    var t = (state.pushCount - 1) / 9;
+    var c = Math.max(0, Math.min(1, t));
+
+    var minW = 170 - c * 54;
+    var padY = 16  - c * 6;
+    var padX = 28  - c * 13;
+    var fs   = 16  - c * 3.5;
+    var ls   = 6   - c * 5;
+
+    btn.style.minWidth      = minW + 'px';
+    btn.style.padding       = padY + 'px ' + padX + 'px';
+    btn.style.fontSize      = fs + 'px';
+    btn.style.letterSpacing = ls + 'px';
+  }
+
+  function startPushLoop(){
+    if (!choicesEl) return;
+    choicesEl.className = 'stage';
+    choicesEl.innerHTML = '';
+    state.pushCount = 0;
+
+    if (breathEl) breathEl.classList.add('on');
+    state.trailEnabled = true;
+    updateVignette();
+
+    var backBtn = document.createElement('button');
+    backBtn.className = 'choice center-back';
+    backBtn.type = 'button';
+    backBtn.textContent = '后退一步';
+    backBtn.style.minWidth      = '170px';
+    backBtn.style.padding       = '16px 28px';
+    backBtn.style.fontSize      = '16px';
+    backBtn.style.letterSpacing = '6px';
+    backBtn.addEventListener('click', function(){
+      onCenterBackClick(backBtn);
+    });
+    choicesEl.appendChild(backBtn);
+  }
+
+  function onCenterBackClick(backBtn){
+    if (state.pushCount >= 10) return;
+    state.pushCount++;
+
+    updateVignette();
+    shrinkBackButton(backBtn);
+
+    spawnForwardButton();
+    spawnForwardButton();
+    spawnForwardButton();
+
+    if (state.pushCount >= 10){
+      if (backBtn) backBtn.disabled = true;
+      setTimeout(doFlash, 520);
+    }
+  }
+
+  function spawnForwardButton(){
+    if (!choicesEl) return;
+
+    var btn = document.createElement('button');
+    btn.className = 'choice spawn-forward';
+    btn.type = 'button';
+    btn.textContent = '';
+
+    var stageW = choicesEl.clientWidth  || window.innerWidth  || 320;
+    var stageH = choicesEl.clientHeight || window.innerHeight || 480;
+
+    var bw = 96;
+    var bh = 36;
+
+    var marginX      = 12;
+    var marginTop    = 14;
+    var marginBottom = 14;
+    var topSafe = Math.max(marginTop, 56);
+
+    var minX = marginX;
+    var maxX = Math.max(minX, stageW - bw - marginX);
+    var minY = topSafe;
+    var maxY = Math.max(minY, stageH - bh - marginBottom);
+
+    var rangeX = maxX - minX;
+    var rangeY = maxY - minY;
+
+    var blockers = [];
+    var centerBtn = choicesEl.querySelector('.center-back');
+    if (centerBtn) blockers.push(centerBtn.getBoundingClientRect());
+    var existing = choicesEl.querySelectorAll('.spawn-forward');
+    for (var k = 0; k < existing.length; k++){
+      blockers.push(existing[k].getBoundingClientRect());
+    }
+
+    var GAP = 8;
+    var x = minX + rangeX * Math.random();
+    var y = minY + rangeY * Math.random();
+    var tries = 0;
+    var maxTries = 80;
+    var found = false;
+
+    while (tries < maxTries && !found){
+      tries++;
+      var tx = minX + rangeX * Math.random();
+      var ty = minY + rangeY * Math.random();
+      var rect = { left: tx, top: ty, right: tx + bw, bottom: ty + bh };
+      var ok = true;
+
+      for (var i = 0; i < blockers.length; i++){
+        var b = blockers[i];
+        var noOverlap =
+          (rect.right  + GAP < b.left) ||
+          (rect.left   - GAP > b.right) ||
+          (rect.bottom + GAP < b.top) ||
+          (rect.top    - GAP > b.bottom);
+        if (!noOverlap){ ok = false; break; }
+      }
+      if (ok){ x = tx; y = ty; found = true; }
+    }
+
+    btn.style.left = Math.round(x) + 'px';
+    btn.style.top  = Math.round(y) + 'px';
+    choicesEl.appendChild(btn);
+
+    setTimeout(function(){
+      btn.classList.add('shown');
+      btn.textContent = '前进一步';
+    }, 800);
+  }
+
+  function doFlash(){
+    state.trailEnabled = false;
+    var dots = document.querySelectorAll('.trail-dot');
+    for (var i = 0; i < dots.length; i++){
+      if (dots[i].parentNode) dots[i].parentNode.removeChild(dots[i]);
+    }
+
+    if (choicesEl) choicesEl.innerHTML = '';
+
+    if (!flashEl){
+      showFinalForward();
+      return;
+    }
+
+    flashEl.style.transition = 'none';
+    flashEl.style.opacity = '0';
+
+    var n = 0;
+    var total = 7;
+
+    function tick(){
+      n++;
+      if (n > total){
+        flashEl.style.transition = 'opacity .7s ease';
+        flashEl.style.opacity = '0';
+        setTimeout(showFinalForward, 760);
+        return;
+      }
+      flashEl.style.transition = 'none';
+      flashEl.style.opacity = (n % 2 === 1) ? '0.94' : '0';
+      setTimeout(tick, 55 + Math.random() * 130);
+    }
+
+    setTimeout(tick, 80);
+  }
+
+  function showFinalForward(){
+    if (flashEl){
+      flashEl.style.transition = 'none';
+      flashEl.style.opacity = '0';
+      flashEl.style.display = 'none';
+    }
+    if (breathEl) breathEl.classList.remove('on');
+    if (vignetteEl) vignetteEl.style.boxShadow = 'inset 0 0 0 0 transparent';
+
+    syncAppHeight();
+
+    if (!choicesEl) return;
+
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+    choicesEl.className = 'final-stage';
+
+    var btn = document.createElement('button');
+    btn.className = 'choice final-forward';
+    btn.type = 'button';
+    btn.textContent = '前进一步';
+
+    btn.style.position = 'static';
+    btn.style.display = 'block';
+    btn.style.opacity = '1';
+    btn.style.visibility = 'visible';
+    btn.style.width = 'auto';
+    btn.style.margin = '0';
+    btn.style.zIndex = '30';
+
+    btn.addEventListener('click', goEnding);
+    choicesEl.appendChild(btn);
+
+    void btn.offsetWidth;
+  }
+
+  function goEnding(){
+    if (state.ending) return;
+    state.ending = true;
+
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+
+    addP('你向前迈出一步。', 'nar');
+    scrollBottom();
+
+    setTimeout(function(){
+      addP('风从耳边呼啸而过。', 'nar');
+      scrollBottom();
+
+      setTimeout(function(){
+        if (fadeEl){
+          fadeEl.style.transition = 'opacity 2.6s ease';
+          fadeEl.classList.add('on');
+        }
+
+        setTimeout(function(){
+          if (logEl) logEl.innerHTML = '';
+          if (choicesEl){
+            choicesEl.className = '';
+            choicesEl.innerHTML = '';
+          }
+          if (logEl) logEl.scrollTop = 0;
+
+          epilogue();
+
+          if (fadeEl){
+            fadeEl.style.transition = 'opacity 1.4s ease';
+            fadeEl.classList.remove('on');
+          }
+        }, 2700);
+
+      }, 2300);
+    }, 1300);
+  }
+
+  function epilogue(){
+    var items = [
+      ['nar',  '葬礼在一个阴雨天举行。'],
+      ['nar',  '亲戚们撑着黑伞，小声议论着。'],
+      ['said', '“现在的孩子心理太脆弱了。”大伯摇头。'],
+      ['said', '“就是，一点挫折都受不了。我们当年挨打挨骂，不都活得好好的？”'],
+      ['nar',  '母亲哭得几乎晕厥，父亲一脸木然。'],
+      ['said', '“我们对他那么好……”母亲对着镜头哭诉，“他怎么能这么自私？”'],
+      ['nar',  '高中群里。'],
+      ['said', '“听说了吗？废物跳楼了。”'],
+      ['said', '“哪个废物啊？”'],
+      ['said', '“还能是哪个，陈默啊。”'],
+      ['said', '“果然废物就是废物，活着也是浪费空气。”'],
+      ['nar',  '他的房间被清理干净，变成了储物间，堆满了杂物。'],
+      ['nar',  '没有人再提起他的名字。'],
+      ['nar',  '陈默用死亡证明了一件事——'],
+      ['final','他们从始至终都是对的。']
+    ];
+
+    var i = 0;
+
+    function tick(){
+      if (i >= items.length){
+        setTimeout(function(){
+          state.ai = 5;
+          state.bi = 0;
+          actTransition(function(){
+            nextBlock();
+          });
+        }, 2000);
+        return;
+      }
+
+      var it = items[i];
+      addP(it[1], it[0]);
+      scrollBottom();
+      i++;
+
+      var delay = (it[0] === 'final') ? 3200 : 1500;
+      setTimeout(tick, delay);
+    }
+
+    tick();
+  }
+
+  function showRestartButton(){
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+
+    var btn = document.createElement('button');
+    btn.className = 'choice restart-btn';
+    btn.type = 'button';
+    btn.textContent = '回到起点';
+    btn.addEventListener('click', restartGame);
+    choicesEl.appendChild(btn);
+    scrollBottom();
+  }
+
+  function restartGame(){
+    if (!choicesEl) return;
+    choicesEl.className = '';
+    choicesEl.innerHTML = '';
+
+    fadeOutBGM(1600);
+
+    if (fadeEl){
+      fadeEl.style.transition = 'opacity 1.8s ease';
+      fadeEl.classList.add('on');
+    }
+
+    setTimeout(function(){
+      resetAll();
+
+      setTimeout(function(){
+        if (fadeEl){
+          fadeEl.style.transition = 'opacity 1s ease';
+          fadeEl.classList.remove('on');
+        }
+      }, 250);
+    }, 1900);
+  }
+
+  function resetAll(){
+    if (bgmEl){
+      try { bgmEl.pause(); } catch(e){}
+      try { bgmEl.currentTime = 0; } catch(e){}
+      bgmEl.volume = 0.4;
+    }
+    if (musicToggle){
+      musicToggle.classList.remove('visible');
+      musicToggle.classList.remove('muted');
+    }
+
+    state.ai = 0;
+    state.bi = 0;
+    state.echoes = [];
+    state.echoIdx = 0;
+    state.pushCount = 0;
+    state.trailEnabled = false;
+    state.musicOn = true;
+    state.musicStarted = false;
+    state.bound = false;
+    state.ending = false;
+
+    if (logEl) logEl.innerHTML = '';
+    if (choicesEl){
+      choicesEl.className = '';
+      choicesEl.innerHTML = '';
+    }
+    if (logEl) logEl.scrollTop = 0;
+
+    if (fadeEl) fadeEl.classList.remove('on');
+    if (breathEl) breathEl.classList.remove('on');
+    if (vignetteEl) vignetteEl.style.boxShadow = 'inset 0 0 0 0 transparent';
+    if (flashEl){
+      flashEl.style.opacity = '0';
+      flashEl.style.display = '';
+      flashEl.style.transition = '';
+    }
+
+    var dots = document.querySelectorAll('.trail-dot');
+    for (var i = 0; i < dots.length; i++){
+      if (dots[i].parentNode) dots[i].parentNode.removeChild(dots[i]);
+    }
+
+    if (coverEl){
+      coverEl.style.display = '';
+      coverEl.classList.remove('hide');
+
+      var coverInner = coverEl.querySelector('.cover-inner');
+      if (coverInner){
+        var animEls = coverInner.querySelectorAll('h1, .sub, button');
+        for (var j = 0; j < animEls.length; j++){
+          animEls[j].style.animation = 'none';
+        }
+        void coverInner.offsetWidth;
+        for (var m = 0; m < animEls.length; m++){
+          animEls[m].style.animation = '';
+        }
+      }
+    }
+  }
+
+  function startBGM(){
+    if (!bgmEl) return;
+    bgmEl.volume = 0;
+
+    function doPlay(){
+      try {
+        var playPromise = bgmEl.play();
+        if (playPromise && playPromise.catch){
+          playPromise.catch(function(err){
+            console.warn('音乐播放失败：', err);
+          });
+        }
+      } catch(e){
+        console.warn('音乐播放异常：', e);
+      }
+
+      var v = 0;
+      var fade = setInterval(function(){
+        v += 0.02;
+        if (v >= 0.4){ v = 0.4; clearInterval(fade); }
+        try { bgmEl.volume = v; } catch(e){}
+      }, 60);
+    }
+
+    try {
+      if (typeof WeixinJSBridge === 'object' && typeof WeixinJSBridge.invoke === 'function'){
+        WeixinJSBridge.invoke('getNetworkType', {}, function(){ doPlay(); });
+      } else if (typeof WeixinJSBridge !== 'undefined'){
+        document.addEventListener('WeixinJSBridgeReady', doPlay, false);
+      } else {
+        doPlay();
+      }
+    } catch(e){
+      doPlay();
+    }
+  }
+
+  function fadeOutBGM(duration){
+    if (!bgmEl) return;
+    var startVol = bgmEl.volume;
+    if (startVol <= 0) return;
+    var steps = 40;
+    var interval = duration / steps;
+    var i = 0;
+    var timer = setInterval(function(){
+      i++;
+      var v = startVol * (1 - i / steps);
+      if (v <= 0){
+        v = 0;
+        clearInterval(timer);
+        try { bgmEl.pause(); } catch(e){}
+      }
+      try { bgmEl.volume = v; } catch(e){}
+    }, interval);
+  }
+
+  function onMusicToggle(e){
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!bgmEl) return;
+
+    if (bgmEl.paused){
+      bgmEl.volume = 0;
+      try {
+        var p = bgmEl.play();
+        if (p && p.catch){ p.catch(function(err){ console.warn(err); }); }
+      } catch(err){}
+
+      var v = 0;
+      var fade = setInterval(function(){
+        v += 0.02;
+        if (v >= 0.8){ v = 0.8; clearInterval(fade); }
+        try { bgmEl.volume = v; } catch(e){}
+      }, 60);
+
+      if (musicToggle) musicToggle.classList.remove('muted');
+      state.musicOn = true;
+    } else {
+      try { bgmEl.pause(); } catch(e){}
+      if (musicToggle) musicToggle.classList.add('muted');
+      state.musicOn = false;
+    }
+  }
+
+  /* =========================================================
+     开始按钮的健壮绑定
+     ========================================================= */
+  function handleStart(e){
+    if (e && e.cancelable) {
+      try { e.preventDefault(); } catch(err){}
+    }
+    if (state.bound) return;
+    state.bound = true;
+
+    if (coverEl) coverEl.classList.add('hide');
+
+    /* ★ 延迟改回 1400ms */
+    setTimeout(function(){
+      if (coverEl) coverEl.style.display = 'none';
+      nextBlock();
+    }, 1400);
+  }
+
+  function bindStartButton(){
+    startBtn = document.getElementById('startBtn');
+
+    if (!startBtn){
+      console.error('[游戏] startBtn 未找到，无法绑定开始按钮');
+      return;
+    }
+
+    startBtn.addEventListener('click', handleStart, false);
+    startBtn.addEventListener('touchend', handleStart, { passive: false });
+    startBtn.addEventListener('pointerup', handleStart, false);
+
+    console.log('[游戏] 开始按钮已绑定');
+  }
+
+  function init(){
+    try {
+      logEl       = document.getElementById('log');
+      choicesEl   = document.getElementById('choices');
+      fadeEl      = document.getElementById('fade');
+      flashEl     = document.getElementById('flash');
+      vignetteEl  = document.getElementById('vignette');
+      breathEl    = document.getElementById('breath');
+      bgmEl       = document.getElementById('bgm');
+      musicToggle = document.getElementById('musicToggle');
+      coverEl     = document.getElementById('cover');
+
+      isTouchDevice = ('ontouchstart' in window) ||
+                      (navigator.maxTouchPoints > 0) ||
+                      safeMatchMedia('(pointer: coarse)');
+
+      console.log('[游戏] 初始化开始，触屏设备：', isTouchDevice);
+
+      syncAppHeight();
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      if (musicToggle){
+        musicToggle.addEventListener('click', onMusicToggle);
+      }
+
+      bindStartButton();
+
+      var rafPending = false;
+      function scheduleSync(){
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(function(){
+          rafPending = false;
+          syncAppHeight();
+        });
+      }
+
+      window.addEventListener('resize', scheduleSync, { passive:true });
+      window.addEventListener('orientationchange', function(){
+        setTimeout(syncAppHeight, 100);
+        setTimeout(syncAppHeight, 350);
+      });
+
+      if (window.visualViewport){
+        try {
+          window.visualViewport.addEventListener('resize', scheduleSync, { passive:true });
+          window.visualViewport.addEventListener('scroll', scheduleSync, { passive:true });
+        } catch(e){}
+      }
+
+      console.log('[游戏] 初始化完成');
+    } catch(err){
+      console.error('[游戏] 初始化出错：', err);
+      try { bindStartButton(); } catch(e2){}
+    }
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  window.addEventListener('load', function(){
+    if (!state.bound && startBtn && !startBtn.__bound){
+      try {
+        startBtn.__bound = true;
+        bindStartButton();
+      } catch(e){}
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
